@@ -645,5 +645,82 @@ public class Application {
 }
 ```
 
+### Simple 监听任务配置
+
+#### 监听Java类
+
+***注意：需实现 ElasticJobListener 接口***
+
+```java
+package top.simba1949.listener;
+
+import com.dangdang.ddframe.job.executor.ShardingContexts;
+import com.dangdang.ddframe.job.lite.api.listener.ElasticJobListener;
+
+/**
+ * 前置后置任务监听实现类，需实现 ElasticJobListener 接口
+ *
+ * @Author SIMBA1949
+ * @Date 2019/9/8 9:41
+ */
+public class MultiListener implements ElasticJobListener {
+    @Override
+    public void beforeJobExecuted(ShardingContexts shardingContexts) {
+        System.err.println("君不见黄河之水天上来");
+    }
+
+    @Override
+    public void afterJobExecuted(ShardingContexts shardingContexts) {
+        String jobParameter = shardingContexts.getJobParameter();
+        System.err.println("奔流到海不复回");
+    }
+}
+```
+
+#### 监听配置文件
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:reg="http://www.dangdang.com/schema/ddframe/reg"
+       xmlns:job="http://www.dangdang.com/schema/ddframe/job"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.dangdang.com/schema/ddframe/reg
+                        http://www.dangdang.com/schema/ddframe/reg/reg.xsd
+                        http://www.dangdang.com/schema/ddframe/job
+                        http://www.dangdang.com/schema/ddframe/job/job.xsd
+                        ">
+<!--配置作业注册中心
+    server-lists ：zookeeper 服务地址:端口
+    namespace ： zookeeper 命名空间
+    max-retries ：最大尝试连接 zookeeper 次数
+    base-sleep-time-milliseconds 等待重试的时间毫秒数（初始值）
+    max-sleep-time-milliseconds ：等待重试的最大时间毫秒数
+-->
+<reg:zookeeper id="regCenter" server-lists="192.168.8.131:2181" namespace="dd-job"
+               base-sleep-time-milliseconds="1000"
+               max-sleep-time-milliseconds="3000"
+               max-retries="3" />
+
+<!-- 配置作业
+    id ：作业名称
+    class ：作业全限定名
+    registry-center-ref ： 指定注册中心
+    cron ： cron 表达式
+    sharding-total-count ：分片总数
+    sharding-item-parameters ：分片项参数值—— 分片项索引号=参数值，多个参数使用逗号隔开
+-->
+<!-- 配置带监听的简单作业-->
+<job:simple id="listenerElasticJob" class="top.simba1949.job.MySimpleJob" registry-center-ref="regCenter"
+            cron="0/5 * * * * ?"
+            sharding-total-count="4"
+            sharding-item-parameters="0=A,1=B,2=C,3=D">
+    <job:listener class="top.simba1949.listener.MultiListener"/>
+</job:simple>
+</beans>
+```
+
 
 
