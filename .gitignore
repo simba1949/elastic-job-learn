@@ -1,4 +1,4 @@
 # Project exclude paths
-/elastic-job-simple/target/
+target
 *.iml
 *.idea
