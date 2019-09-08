@@ -24,15 +24,17 @@
 
 <!-- 配置作业
     id ：作业名称
+    class ：作业全限定名
     registry-center-ref ： 指定注册中心
     cron ： cron 表达式
     sharding-total-count ：分片总数
     sharding-item-parameters ：分片项参数值—— 分片项索引号=参数值，多个参数使用逗号隔开
-    script-command-line : 要执行的脚步
 -->
-<job:script id="oneOffElasticJob"  registry-center-ref="regCenter"
-            cron="0/10 * * * * ?"
+<!-- 配置带监听的简单作业-->
+<job:simple id="listenerElasticJob" class="top.simba1949.job.MySimpleJob" registry-center-ref="regCenter"
+            cron="0/5 * * * * ?"
             sharding-total-count="4"
-            sharding-item-parameters="0=A,1=B,2=C,3=D"
-            script-command-line="D:\IDE\IDEA\Workspace\Learn\elastic-job-learn\elastic-job-script\src\main\resources\print.py"/>
+            sharding-item-parameters="0=A,1=B,2=C,3=D">
+    <job:listener class="top.simba1949.listener.MultiListener"/>
+</job:simple>
 </beans>
